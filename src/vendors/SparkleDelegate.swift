@@ -24,6 +24,8 @@ class SparkleDelegate: NSObject, SPUUpdaterDelegate {
     var onNextCheckCompletion: ((UpdateCheckResult) -> Void)?
 
     func feedURLString(for updater: SPUUpdater) -> String? {
+        // Internal build: no update feed, otherwise Sparkle would replace this build with the official binary.
+        if LicenseManager.internalProUnlock { return nil }
         return Endpoints.appcastUrl
     }
 

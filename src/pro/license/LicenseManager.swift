@@ -24,6 +24,8 @@ class LicenseManager {
         )
     }()
 
+    /// Internal build: Pro unlocked permanently (GPL-3.0 self-build). Trial never starts, no license server calls.
+    static let internalProUnlock = true
     static let trialDuration = 14
     private static let revalidationInterval: TimeInterval = 30 * 24 * 60 * 60 // 30 days
     static let keychainKeyAccount = "licenseKey"
@@ -166,7 +168,7 @@ class LicenseManager {
     }
 
     private func startTrialIfNeeded() {
-        guard appIsUsable, !isMocked, defaults.object(forKey: "trialStartDate") == nil,
+        guard appIsUsable, !isMocked, !Self.internalProUnlock, defaults.object(forKey: "trialStartDate") == nil,
               keychain.value(account: Self.keychainKeyAccount) == nil else { return }
         defaults.set(clock.now.timeIntervalSince1970, forKey: "trialStartDate")
         refreshState()
@@ -253,6 +255,7 @@ class LicenseManager {
     }
 
     func computeState() -> LicenseState {
+        if Self.internalProUnlock { return .pro }
         #if DEBUG
         if hasMockedLicense { return mockedTrialStartDate.map(trialState) ?? state }
         #endif
